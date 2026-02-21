@@ -1,0 +1,53 @@
+.container {
+  padding: 0 1.25rem;
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.9rem;
+}
+
+.table th {
+  text-align: left;
+  padding: 0.5rem 1rem;
+  color: #52525b;
+  font-weight: 500;
+  border-bottom: 1px solid #1f1f27;
+}
+
+.table td {
+  padding: 0.75rem 1rem;
+  color: #d4d4d8;
+  border-bottom: 1px solid #1a1a22;
+}
+
+.table tbody tr:hover {
+  background-color: #13131a;
+}
+
+.status {
+  text-align: center;
+  color: #52525b;
+  font-size: 0.9rem;
+  margin-top: 3rem;
+}
+
+.index {
+  color: #3f3f46;
+  font-size: 0.8rem;
+}
+
+.kda {
+  font-family: monospace;
+  font-size: 0.95rem;
+}
+
+.kills { color: #4ade80; }
+.deaths { color: #f87171; }
+.assists { color: #60a5fa; }
+
+.separator {
+  color: #3f3f46;
+  margin: 0 0.2rem;
+}
