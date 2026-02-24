@@ -1,6 +1,6 @@
 .page {
   min-height: 100vh;
-  background-color: #0d0d12;
+  background-color: #111118;
 }
 
 .header {
@@ -8,7 +8,7 @@
   align-items: center;
   justify-content: space-between;
   padding: 0.875rem 1.5rem;
-  border-bottom: 1px solid #1a1a22;
+  border-bottom: 1px solid #27272f;
 }
 
 .headerLeft {
@@ -35,7 +35,7 @@
 .appName {
   font-size: 0.9rem;
   font-weight: 600;
-  color: #a1a1aa;
+  color: #c4c4cc;
 }
 
 .loggedInBadge {

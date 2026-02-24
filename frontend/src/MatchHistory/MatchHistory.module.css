@@ -8,22 +8,49 @@
   font-size: 0.9rem;
 }
 
+.table thead {
+  display: table;
+  width: 100%;
+  table-layout: fixed;
+}
+
 .table th {
   text-align: left;
   padding: 0.5rem 1rem;
-  color: #52525b;
+  color: #8b8b99;
   font-weight: 500;
-  border-bottom: 1px solid #1f1f27;
+  border-bottom: 1px solid #27272f;
+  background-color: #16161e;
+}
+
+.table tbody {
+  display: block;
+  max-height: 28.5rem;
+  overflow-y: auto;
+}
+
+.table tbody tr {
+  display: table;
+  width: 100%;
+  table-layout: fixed;
 }
 
 .table td {
   padding: 0.75rem 1rem;
-  color: #d4d4d8;
-  border-bottom: 1px solid #1a1a22;
+  color: #e8e8ed;
+  border-bottom: 1px solid #27272f;
 }
 
 .table tbody tr:hover {
-  background-color: #13131a;
+  background-color: #1e1e28;
+}
+
+.win {
+  background-color: rgba(74, 222, 128, 0.12);
+}
+
+.loss {
+  background-color: rgba(248, 113, 113, 0.12);
 }
 
 .status {
@@ -34,7 +61,7 @@
 }
 
 .index {
-  color: #3f3f46;
+  color: #62626e;
   font-size: 0.8rem;
 }
 
@@ -48,6 +75,6 @@
 .assists { color: #60a5fa; }
 
 .separator {
-  color: #3f3f46;
+  color: #52525b;
   margin: 0 0.2rem;
 }

@@ -13,6 +13,7 @@ type PlayerMatchHistoryEntry struct {
 	PlayerDeaths  int32 `json:"player_deaths"`
 	PlayerAssists int32 `json:"player_assists"`
 	HeroID        int32 `json:"hero_id"`
+	MatchResult   int32 `json:"match_result"`
 }
 
 type HeroAssets struct {
@@ -47,26 +48,30 @@ func GetMatches(userId string, numMatches int) ([]PlayerMatchHistoryEntry, error
 	return playerHistory[:numMatches], nil
 }
 
-func GetHeroAssets() error {
+func GetHeroAssets() ([]HeroAssets, error) {
 	// Either grab from DB, or if version changes, we would update then return those values
 	url := AssetsURL + HeroAssetsSuff
+
+	heroAssets := []HeroAssets{}
 	res, ok := http.Get(url)
 	if ok != nil || res.StatusCode != 200 {
-		return fmt.Errorf("Issue calling API: %s", url)
+		return heroAssets, fmt.Errorf("Issue calling API: %s", url)
 	}
 
 	bodyBytes, errDecode := io.ReadAll(res.Body)
 	if errDecode != nil {
-		return errDecode
+		return heroAssets, errDecode
 	}
 
-	var heroAssets HeroAssets
 	errUnmarshal := json.Unmarshal(bodyBytes, &heroAssets)
 	if errUnmarshal != nil {
-		return errUnmarshal
+		return heroAssets, errUnmarshal
 	}
 
+	// TODO:
 	// Write values to database
 	// Implement some logic eventually that grabs values from DB..
 	// If version changes, we would need to recall this API, update DB.
+
+	return heroAssets, nil
 }

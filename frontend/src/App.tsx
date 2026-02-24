@@ -2,9 +2,14 @@ import { AuthProvider, useAuth } from './context/AuthContext'
 import LoginPage from './LoginPage/LoginPage'
 import Dashboard from './Dashboard/Dashboard'
 import styles from './App.module.css'
+import { useHeroAssets } from './hooks/useHeroAssets'
 
 function AppShell() {
   const { steamId } = useAuth()
+  
+  // Grab Hero assets on app load.
+  const {data: heroAssets } = useHeroAssets();
+  console.log(heroAssets);
 
   return (
     <div className={styles.page}>

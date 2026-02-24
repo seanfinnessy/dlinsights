@@ -8,7 +8,7 @@
 }
 
 .section {
-  border: 1px solid #1a1a22;
+  border: 1px solid #27272f;
   border-radius: 10px;
   overflow: hidden;
 }
@@ -20,9 +20,9 @@
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.08em;
-  color: #52525b;
-  border-bottom: 1px solid #1a1a22;
-  background-color: #0f0f16;
+  color: #8b8b99;
+  border-bottom: 1px solid #27272f;
+  background-color: #16161e;
 }
 
 .sectionBody {
@@ -31,7 +31,7 @@
 }
 
 .empty {
-  color: #3f3f46;
+  color: #52525b;
   font-size: 0.85rem;
   text-align: center;
   margin-top: 3rem;

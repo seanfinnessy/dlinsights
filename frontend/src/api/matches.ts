@@ -4,6 +4,7 @@ export type Match = {
   player_deaths: number
   player_assists: number
   hero_id: number
+  match_result: number
 }
 
 export async function fetchMatches(steamId: string, numMatches: number): Promise<Match[]> {

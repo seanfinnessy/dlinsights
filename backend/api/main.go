@@ -42,7 +42,7 @@ func main() {
 	r.Get("/get-matches/{userId}", func(w http.ResponseWriter, r *http.Request) {
 		// Grab URL and Query params
 		userId := chi.URLParam(r, "userId")
-		numMatchesStr := r.URL.Query().Get("numMatches")
+		numMatchesStr := r.URL.Query().Get("amount")
 		if numMatchesStr == "" {
 			numMatchesStr = "10" // fallback, URL.Query().Get() returns empty string if not found
 		}
@@ -61,18 +61,22 @@ func main() {
 			return
 		}
 
-		for _, match := range(matches) {
-			fmt.Printf("AccountID: %d\n", match.AccountID)
-			fmt.Printf("Kills: %d\n", match.PlayerKills)
-			fmt.Printf("HeroID: %d\n", match.HeroID)
-			fmt.Println()
-		}
-
 		// Set headers
 		w.Header().Set("Content-Type", "application/json")
 		// Stream JSON directly into response writer
 		json.NewEncoder(w).Encode(matches)
 
+	})
+
+	r.Get("/get-hero-assets", func(w http.ResponseWriter, r *http.Request) {
+		heroAssets, err := deadlock.GetHeroAssets()
+		if err != nil {
+			fmt.Println(err)
+			w.WriteHeader(http.StatusInternalServerError)
+		}
+
+		w.Header().Set("Content-Type", "application/json")
+		json.NewEncoder(w).Encode(heroAssets)
 	})
 
 	// Setup CORS handler
