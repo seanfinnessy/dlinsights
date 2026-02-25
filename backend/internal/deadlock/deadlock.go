@@ -3,7 +3,6 @@ package deadlock
 import (
 	"encoding/json"
 	"fmt"
-	"io"
 	"net/http"
 )
 
@@ -14,6 +13,10 @@ type PlayerMatchHistoryEntry struct {
 	PlayerAssists int32 `json:"player_assists"`
 	HeroID        int32 `json:"hero_id"`
 	MatchResult   int32 `json:"match_result"`
+	MatchDuration int32 `json:"match_duration_s"`
+	StartTime     int32 `json:"start_time"`
+	NetWorth      int32 `json:"net_worth"`
+	MatchMode int32 	`json:"game_mode"`
 }
 
 type HeroAssets struct {
@@ -26,23 +29,20 @@ func ConstructGetMatchHistoryURL(userId string) string {
 }
 
 func GetMatches(userId string, numMatches int) ([]PlayerMatchHistoryEntry, error) {
-	var playerHistory []PlayerMatchHistoryEntry
+	playerHistory := []PlayerMatchHistoryEntry{}
 	url := ConstructGetMatchHistoryURL(userId)
 	res, errGet := http.Get(url)
 	if errGet != nil || res.StatusCode != 200 {
 		return []PlayerMatchHistoryEntry{}, fmt.Errorf("Issue calling API: %s", url)
 	}
 
-	// read bytes
-	bodyBytes, errDecode := io.ReadAll(res.Body)
-	if errDecode != nil {
-		return []PlayerMatchHistoryEntry{}, errDecode
+	err := json.NewDecoder(res.Body).Decode(&playerHistory)
+	if err != nil {
+		return playerHistory, err
 	}
 
-	// unmarshal bytes into player history
-	errUnmarshal := json.Unmarshal(bodyBytes, &playerHistory)
-	if errUnmarshal != nil {
-		return []PlayerMatchHistoryEntry{}, errUnmarshal
+	for _, match := range playerHistory {
+		fmt.Printf("match mode: %d\n", match.MatchMode)
 	}
 
 	return playerHistory[:numMatches], nil
@@ -58,14 +58,9 @@ func GetHeroAssets() ([]HeroAssets, error) {
 		return heroAssets, fmt.Errorf("Issue calling API: %s", url)
 	}
 
-	bodyBytes, errDecode := io.ReadAll(res.Body)
-	if errDecode != nil {
-		return heroAssets, errDecode
-	}
-
-	errUnmarshal := json.Unmarshal(bodyBytes, &heroAssets)
-	if errUnmarshal != nil {
-		return heroAssets, errUnmarshal
+	err := json.NewDecoder(res.Body).Decode(&heroAssets)
+	if err != nil {
+		return heroAssets, err
 	}
 
 	// TODO:

@@ -3,8 +3,7 @@
   grid-template-columns: 1fr 1fr;
   gap: 1.5rem;
   padding: 1.5rem;
-  max-width: 1200px;
-  margin: 0 auto;
+  max-width: 100%;
 }
 
 .section {
@@ -26,8 +25,12 @@
 }
 
 .sectionBody {
-  padding: 1rem 0;
+  padding: 0;
   min-height: 200px;
+}
+
+.fullWidth {
+  grid-column: 1 / -1;
 }
 
 .empty {
