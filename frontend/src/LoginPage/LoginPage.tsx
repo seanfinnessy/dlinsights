@@ -1,8 +1,9 @@
+import { useAuth } from '../context/AuthContext'
+import { SteamLogin } from "../../wailsjs/go/main/App";
 import styles from "./LoginPage.module.css";
 
 function LoginPage() {
-    const params = new URLSearchParams(window.location.search)
-    const authError = params.get('error')
+    const { authError } = useAuth()
 
     return (
         <div className={styles.loginPage}>
@@ -11,11 +12,11 @@ function LoginPage() {
                 <h1 className={styles.title}>Deadlock Stats Tracker</h1>
                 <p className={styles.subtitle}>Track your matches, stats, and performance</p>
                 {authError && (
-                    <p className={styles.errorText}>Login failed. Please try again.</p>
+                    <p className={styles.errorText}>{authError}</p>
                 )}
-                <a href="http://localhost:3000/auth/steam/login" className={styles.steamButton}>
+                <button onClick={() => SteamLogin()} className={styles.steamButton}>
                     <SteamIcon />Sign in through Steam
-                </a>
+                </button>
             </div>
         </div>
     )

@@ -41,10 +41,6 @@ func GetMatches(userId string, numMatches int) ([]PlayerMatchHistoryEntry, error
 		return playerHistory, err
 	}
 
-	for _, match := range playerHistory {
-		fmt.Printf("match mode: %d\n", match.MatchMode)
-	}
-
 	return playerHistory[:numMatches], nil
 }
 
