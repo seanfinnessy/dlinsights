@@ -1,3 +1,5 @@
+import { GetMatches } from "../../wailsjs/go/main/App";
+
 export type Match = {
   account_id: number
   player_kills: number
@@ -12,9 +14,5 @@ export type Match = {
 }
 
 export async function fetchMatches(steamId: string, numMatches: number): Promise<Match[]> {
-  const res = await fetch(`http://localhost:3000/get-matches/${steamId}?amount=${numMatches}`);
-  if (!res.ok) {
-    throw new Error('Failed to fetch matches')
-  }
-  return res.json()
+  return GetMatches(steamId, numMatches)
 }

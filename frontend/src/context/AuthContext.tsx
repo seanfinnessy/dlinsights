@@ -1,25 +1,31 @@
-import { createContext, useContext } from 'react'
+import { createContext, useContext, useState, useEffect } from 'react'
 import type { ReactNode } from 'react'
+import { EventsOn } from '../../wailsjs/runtime/runtime'
 
 type AuthContextType = {
   steamId: string | null
+  authError: string | null
 }
 
-// Context for if user is logged in or not
-const AuthContext = createContext<AuthContextType>({ steamId: null })
+const AuthContext = createContext<AuthContextType>({ steamId: null, authError: null })
 
 export function AuthProvider({ children }: { children: ReactNode }) {
-  const params = new URLSearchParams(window.location.search)
-  const steamId = params.get('steamId')
+  const [steamId, setSteamId] = useState<string | null>(null)
+  const [authError, setAuthError] = useState<string | null>(null)
+
+  // handle the events emitted from Go
+  useEffect(() => {
+    EventsOn('steam:authed', (id: string) => setSteamId(id))
+    EventsOn('steam:error', () => setAuthError('Login failed. Please try again.'))
+  }, [])
 
   return (
-    <AuthContext.Provider value={{ steamId }}>
+    <AuthContext.Provider value={{ steamId, authError }}>
       {children}
     </AuthContext.Provider>
   )
 }
 
-// Hook to see if user is logged in or not
 export function useAuth() {
   return useContext(AuthContext)
 }
