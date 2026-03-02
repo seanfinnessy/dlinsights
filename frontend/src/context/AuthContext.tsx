@@ -5,13 +5,16 @@ import { EventsOn } from '../../wailsjs/runtime/runtime'
 type AuthContextType = {
   steamId: string | null
   authError: string | null
+  accountId: number | null
+  setAccountId: (id: number) => void
 }
 
-const AuthContext = createContext<AuthContextType>({ steamId: null, authError: null })
+const AuthContext = createContext<AuthContextType>({ steamId: null, authError: null, accountId: null, setAccountId: () => {} })
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [steamId, setSteamId] = useState<string | null>(null)
   const [authError, setAuthError] = useState<string | null>(null)
+  const [accountId, setAccountId] = useState<number | null>(null)
 
   // handle the events emitted from Go
   useEffect(() => {
@@ -20,7 +23,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, [])
 
   return (
-    <AuthContext.Provider value={{ steamId, authError }}>
+    <AuthContext.Provider value={{ steamId, authError, accountId, setAccountId }}>
       {children}
     </AuthContext.Provider>
   )

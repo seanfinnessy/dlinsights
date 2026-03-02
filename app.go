@@ -27,6 +27,10 @@ func (a *App) GetMatches(steamId string, numMatches int) ([]deadlock.PlayerMatch
 	return deadlock.GetMatches(steamId, numMatches)
 }
 
+func (a *App) GetMatchInfo(matchId string) (deadlock.MatchInfoResponse, error) {
+	return deadlock.GetMatchInfo(matchId)
+}
+
 func (a *App) GetHeroAssets() ([]deadlock.HeroAssets, error) {
 	return deadlock.GetHeroAssets()
 }

@@ -6,6 +6,10 @@ export function GetHeroAssets() {
   return window['go']['main']['App']['GetHeroAssets']();
 }
 
+export function GetMatchInfo(arg1) {
+  return window['go']['main']['App']['GetMatchInfo'](arg1);
+}
+
 export function GetMatches(arg1, arg2) {
   return window['go']['main']['App']['GetMatches'](arg1, arg2);
 }

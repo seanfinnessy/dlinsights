@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import type { Match } from '../api/matches'
 import { useAuth } from '../context/AuthContext'
 import { useMatches } from '../hooks/useMatches'
@@ -12,14 +12,17 @@ interface MatchHistoryProps {
 }
 
 function MatchHistory({ onSelectMatch, selectedMatch }: MatchHistoryProps) {
-  const { steamId } = useAuth()
+  const { steamId, setAccountId } = useAuth()
 
   const [matchAmount, setMatchAmount] = useState(10)
   const { data: matches, isLoading, isError } = useMatches(steamId, matchAmount)
   const { data: heroAssets } = useHeroAssets()
 
-  // We want to use useMemo here to cache the heroMap, that way it doesnt
-  // get remade on each re-render.. only when heroAssets updates.
+  // Grab the users account id
+  useEffect(() => {
+    if (matches?.[0]) setAccountId(matches[0].account_id)
+  }, [matches])
+
   const heroMap = useMemo(() => {
     if (!heroAssets) return {}
     return Object.fromEntries(heroAssets.map(h => [h.id, h.name]))
@@ -36,7 +39,8 @@ function MatchHistory({ onSelectMatch, selectedMatch }: MatchHistoryProps) {
         return <tr
           key={i}
           className={[
-            match.match_result === 1 ? styles.win : styles.loss,
+            // If players team matches the match_result (winning team), then they won
+            match.match_result === match.player_team ? styles.win : styles.loss,
             match === selectedMatch ? styles.selected : ''
           ].join(' ')}
           onClick={() => onSelectMatch(match)}

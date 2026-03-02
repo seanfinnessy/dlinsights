@@ -4,6 +4,8 @@ import {deadlock} from '../models';
 
 export function GetHeroAssets():Promise<Array<deadlock.HeroAssets>>;
 
+export function GetMatchInfo(arg1:string):Promise<deadlock.MatchInfoResponse>;
+
 export function GetMatches(arg1:string,arg2:number):Promise<Array<deadlock.PlayerMatchHistoryEntry>>;
 
 export function SteamLogin():Promise<void>;

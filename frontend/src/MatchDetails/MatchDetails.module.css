@@ -1,0 +1,59 @@
+.teams {
+  display: grid;
+  grid-template-columns: 1fr 1px 1fr;
+  height: 100%;
+}
+
+.teamDivider {
+  background-color: #27272f;
+}
+
+.teamHeader {
+  padding: 0.4rem 1rem;
+  font-size: 0.7rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  border-bottom: 1px solid #27272f;
+}
+
+.win {
+  color: #4ade80;
+}
+
+.loss {
+  color: #f87171;
+}
+
+.player {
+  display: flex;
+  align-items: center;
+  padding: 0.35rem 1rem;
+  border-bottom: 1px solid #1a1a22;
+  gap: 0.5rem;
+}
+
+.accountId {
+  font-size: 0.8rem;
+  font-family: monospace;
+  color: #c4c4d4;
+}
+
+.you {
+  background-color: #1e2a1e;
+}
+
+.youBadge {
+  font-size: 0.65rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: #4ade80;
+}
+
+.status {
+  color: #52525b;
+  font-size: 0.85rem;
+  text-align: center;
+  margin-top: 3rem;
+}

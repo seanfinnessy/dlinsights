@@ -13,19 +13,55 @@ type PlayerMatchHistoryEntry struct {
 	PlayerAssists int32 `json:"player_assists"`
 	HeroID        int32 `json:"hero_id"`
 	MatchResult   int32 `json:"match_result"`
+	PlayerTeam    int32 `json:"player_team"`
 	MatchDuration int32 `json:"match_duration_s"`
 	StartTime     int32 `json:"start_time"`
 	NetWorth      int32 `json:"net_worth"`
-	MatchMode int32 	`json:"game_mode"`
+	MatchMode     int32 `json:"game_mode"`
+	MatchID       int64 `json:"match_id"`
 }
 
 type HeroAssets struct {
 	HeroID int32  `json:"id"`
 	Name   string `json:"name"`
 }
+type MatchInfoResponse struct {
+	MatchInfo MatchInfo `json:"match_info"`
+}
+
+type MatchInfo struct {
+	Players     []Player `json:"players"`
+	WinningTeam int32    `json:"winning_team"`
+}
+
+type Player struct {
+	AccountID int32 `json:"account_id"`
+	Team      int32 `json:"team"`
+}
 
 func ConstructGetMatchHistoryURL(userId string) string {
 	return PlayersURL + userId + MatchHistorySuff
+}
+
+func GetMatchInfo(matchId string) (MatchInfoResponse, error) {
+	matchInfo := MatchInfoResponse{}
+	url := MatchesURL + matchId + "/metadata"
+	fmt.Println(url)
+	res, errGet := http.Get(url)
+	if errGet != nil || res.StatusCode != 200 {
+		return matchInfo, fmt.Errorf("Issue calling API: %s", url)
+	}
+	err := json.NewDecoder(res.Body).Decode(&matchInfo)
+	if err != nil {
+		return matchInfo, err
+	}
+
+	for _, player := range matchInfo.MatchInfo.Players {
+		fmt.Println(player.AccountID)
+		fmt.Println(player.Team)
+	}
+
+	return matchInfo, nil
 }
 
 func GetMatches(userId string, numMatches int) ([]PlayerMatchHistoryEntry, error) {

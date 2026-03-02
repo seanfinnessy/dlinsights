@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import type { Match } from '../api/matches'
 import MatchHistory from '../MatchHistory/MatchHistory'
+import MatchDetails from '../MatchDetails/MatchDetails'
 import styles from './Dashboard.module.css'
 
 function Dashboard() {
@@ -12,9 +13,10 @@ function Dashboard() {
         <MatchHistory onSelectMatch={setSelectedMatch} selectedMatch={selectedMatch} />
       </Section>
       <Section title="Match Details">
-        <p className={styles.empty}>
-          {selectedMatch ? 'Details coming soon.' : 'Select a match to view details.'}
-        </p>
+        {selectedMatch
+          ? <MatchDetails match={selectedMatch} />
+          : <p className={styles.empty}>Select a match to view details.</p>
+        }
       </Section>
       <Section title="Live Match Feed" fullWidth>
         <p className={styles.empty}>No live match detected.</p>
