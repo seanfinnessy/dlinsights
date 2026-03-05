@@ -7,30 +7,32 @@ import (
 	"net"
 	"net/http"
 	"os"
-	"path/filepath"
+	"strings"
+	"sync"
+	"time"
 
 	"github.com/fsnotify/fsnotify"
 	"github.com/seanfinnessy/dlinsights/internal/deadlock"
 	"github.com/seanfinnessy/dlinsights/internal/login"
+	"github.com/shirou/gopsutil/v4/process"
+
 	wailsruntime "github.com/wailsapp/wails/v2/pkg/runtime"
 )
 
-func addWatcherRecursive(watcher *fsnotify.Watcher, root string) error {
-	return filepath.Walk(root, func(path string, info os.FileInfo, err error) error {
-		if err != nil {
-			return err
+func isGameRunning() bool {
+	processes, _ := process.Processes()
+	for _, p := range processes {
+		name, _ := p.Name()
+		if strings.Contains(strings.ToLower(name), "deadlock") {
+			return true
 		}
-
-		if info.IsDir() {
-			return watcher.Add(path)
-		}
-
-		return nil
-	})
+	}
+	
+	return false
 }
 
-func getDLchanges() {
-	rootPath := "C:\\Program Files (x86)\\Steam\\steamapps\\common\\Deadlock"
+func checkForActiveGame(a *App, stop chan struct{}) {
+	path := "C:\\Program Files (x86)\\Steam\\steamapps\\common\\Deadlock\\game\\citadel\\"
 
 	watcher, err := fsnotify.NewWatcher()
 	if err != nil {
@@ -38,62 +40,127 @@ func getDLchanges() {
 	}
 	defer watcher.Close()
 
-	// Watch existing folders
-	err = addWatcherRecursive(watcher, rootPath)
+	// Attach our watcher to citadel path to look for Writing to reconnect.dat
+	// Created and written to when game is found
+	// Removed when leaving game
+	err = watcher.Add(path)
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	fmt.Println("Watching all folders under:", rootPath)
-
 	for {
 		select {
+			case event := <-watcher.Events:
 
-		case event := <-watcher.Events:
+				fmt.Println("Event:", event)
 
-			fmt.Println("Event:", event)
-
-			// New directory → watch it
-			if event.Op&fsnotify.Create == fsnotify.Create {
-				if info, err := os.Stat(event.Name); err == nil && info.IsDir() {
-					watcher.Add(event.Name)
-					fmt.Println("New directory watched:", event.Name)
-				}
-			}
-
-			// File written → read contents
-			if event.Op&fsnotify.Write == fsnotify.Write {
-
-				if info, err := os.Stat(event.Name); err == nil && !info.IsDir() {
-					if event.Name.includes("reconnect.dat") { // TODO: "C:\\Program Files (x86)\\Steam\\steamapps\\common\\Deadlock\\game\\citadel\\reconnect.dat" is created and written at game start, and removed at end
-						fmt.Println("Found game")
-					}
-					data, err := os.ReadFile(event.Name)
-					if err == nil {
-						fmt.Println("File updated:", event.Name)
-						fmt.Println(string(data))
+				// File written → read contents
+				// event.Op is a bitmask, fsnotify defines file op types as bit flags.
+				// so here we are just comparing the bits of event.Op to the bits of Write. If it contains the write bits, it is a write event
+				// "is the write bit turned on inside of event.Op"
+				if event.Op & fsnotify.Write == fsnotify.Write {
+					// verify the written to file isnt a dir..
+					if info, err := os.Stat(event.Name); err == nil && !info.IsDir() {
+						if strings.Contains(event.Name, "reconnect.dat") { 
+							fmt.Println("Found game!")
+							a.status.SetInProgressMatch(true)
+						}
 					}
 				}
-			}
 
-		case err := <-watcher.Errors:
-			fmt.Println("Watcher error:", err)
-		}
+				if event.Op&fsnotify.Remove == fsnotify.Remove {
+					if info, err := os.Stat(event.Name); err == nil && !info.IsDir() {
+						if strings.Contains(event.Name, "reconnect.dat") { 
+							fmt.Println("Left game!")
+							a.status.SetInProgressMatch(false)
+						}
+					}
+				}
+
+			case err := <-watcher.Errors:
+				fmt.Println("Watcher error:", err)
+				a.status.SetInProgressMatch(false)
+
+			case <-stop:
+				fmt.Println("Game closed, stopping file watcher")
+				a.status.SetInProgressMatch(false)
+				return
+			}
 	}
 }
 
 type App struct {
 	ctx context.Context
+	status GameStatus
+}
+
+type GameStatus struct {
+	GameRunning bool
+	InProgressMatch bool
+	mu sync.RWMutex
 }
 
 func NewApp() *App {
 	return &App{}
 }
 
+
 func (a *App) startup(ctx context.Context) {
 	a.ctx = ctx
+	
+	go func() {
+		// create ticker
+		ticker := time.NewTicker(4 * time.Second)
+		defer ticker.Stop()
 
-	getDLchanges()
+		// create a channel on initial start..
+		stopWatcher := make(chan struct{})
+		var watcherIsRunning bool
+
+		// monitor game state
+		for range(ticker.C) {
+			gameRunning := isGameRunning()
+			if gameRunning && !watcherIsRunning {
+				fmt.Println("Game is now open, starting the file watcher...")
+				// recreate the channel if game is restarted
+				stopWatcher := make(chan struct{})
+				a.status.SetGameRunning(true)
+				watcherIsRunning = true
+				go checkForActiveGame(a, stopWatcher)
+				
+			}
+
+			if !gameRunning && watcherIsRunning {
+				fmt.Println("Game is now closed, stop the file watcher...")
+				a.status.SetGameRunning(false)
+				// close channel  when game is closed
+				close(stopWatcher)
+				watcherIsRunning = false
+			}
+		}
+	}()
+
+}
+
+func (s *GameStatus) SetGameRunning(running bool) {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+
+	s.GameRunning = running
+}
+
+func (s *GameStatus) SetInProgressMatch(inMatch bool) {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+
+	s.InProgressMatch = inMatch
+}
+
+func (s *GameStatus) Get() (bool, bool) {
+	s.mu.RLock()
+	defer s.mu.RUnlock()
+
+	return s.GameRunning, s.InProgressMatch
 }
 
 func (a *App) GetMatches(steamId string, numMatches int) ([]deadlock.PlayerMatchHistoryEntry, error) {
